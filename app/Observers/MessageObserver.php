@@ -3,6 +3,7 @@
 namespace App\Observers;
 
 use App\Conversation;
+use App\Events\MessageSent;
 use App\Message;
 
 class MessageObserver
@@ -30,5 +31,7 @@ class MessageObserver
             $conversation->last_time = $message->created_at;
             $conversation->save();
         }
+
+        event(new MessageSent($message));
     }
 }

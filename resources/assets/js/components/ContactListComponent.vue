@@ -16,24 +16,19 @@
 </template>
 <script>
 export default {
+    props: {
+        conversations: Array,
+    },
     data() {
         return {
-            conversations: [],
+            
         }
     },
-    mounted(){
-        this.getConversations();
+    mounted(){        
     },
-    methods: {
-        getConversations(){
-            axios.get('/api/conversations')
-            .then((response) => {
-                console.log(response.data);
-                this.conversations = response.data;
-            });
-        },
+    methods: {        
         selectConversation(conversation){
-            console.log(conversation);
+            this.$emit('conversationSelected',conversation)
         }
     }
 }

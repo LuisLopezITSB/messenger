@@ -1,15 +1,17 @@
 <template>
     <b-row class="h-100">
         <b-col cols="8">
-            <b-card
+            <b-card no-body
                 footer-bg-variant="light"
                 footer-border-variant="dark"
                 title="Conversación Activa"
                 class="h-100">
 
-                <message-conversation-component v-for="message in messages" :key="message.id" :written-by-me="message.written_by_me">
-                    {{ message.content }}
-                </message-conversation-component>
+                <b-card-body class="card-body-scroll">
+                    <message-conversation-component v-for="message in messages" :key="message.id" :written-by-me="message.written_by_me">
+                        {{ message.content }}
+                    </message-conversation-component>
+                </b-card-body>
 
                 <div slot="footer">
                     <b-form class="mb-0" @submit.prevent="postMessages" autocomplete="off">
@@ -26,7 +28,7 @@
         <b-col cols="4">
             <b-img rounded="circle" blank width="60" height="60" blank-color="#777" alt="image" class="m-1">
             </b-img>
-            <p>Usuario Seleccionado</p>
+            <p>{{ contactName }}</p>
             <hr>
             <b-form-checkbox>
                 Desactivar notificaciones
@@ -36,25 +38,20 @@
 </template>
 <script>
 export default {
+    props: {
+        contactId: Number,
+        contactName: String,
+        messages: Array,
+    },
     data(){
-        return {
-            messages: [],
+        return {            
             newMessage: '',
-            contactId: 2,
         }
     },
     mounted(){
-        this.getMessages();
             
     },
-    methods: {
-        getMessages(){
-            axios.get(`/api/messages?contact_id=${this.contactId}`)
-            .then((response) => {                
-                // console.log(response.data);
-                this.messages = response.data;
-            });
-        },
+    methods: {        
         postMessages(){
             const params = {
                 to_id: this.contactId,
@@ -64,11 +61,25 @@ export default {
             .then((response) => {                
                 if(response.data.success){
                     this.newMessage = '';
-                    this.getMessages();
+                    const message = response.data.message;
+                    message.written_by_me = true;
+                    this.$emit('messageCreated', message);
                 }
             });
         },
-
+        scrollToBottom(){
+            const el = document.querySelector('.card-body-scroll');
+            el.scrollTop = el.scrollHeight;
+        }
+    },
+    updated() {
+        this.scrollToBottom();
     }
 }
 </script>
+<style scoped>
+    .card-body-scroll {
+        max-height: calc(100vh - 122px);
+        overflow-y: auto;
+    }
+</style>
